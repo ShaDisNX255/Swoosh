@@ -518,8 +518,8 @@ namespace swoosh {
      @brief Updates the current activity or segue. Will manage the segue transition states.
      @param elapsed. Time in seconds
 
-     If optimized for performance and the quality mode is set to `mobile`, will not update the 
-     activities in the segue to help increase performance on lower end hardware
+     Segue update behavior is handled by Segue::onUpdate().
+     On Android, Segue updates only the incoming activity during transitions.
     */
     void update(double elapsed) {
       if (activities.size() == 0)
@@ -557,12 +557,7 @@ namespace swoosh {
       if (segueAction != SegueAction::none) {
         swoosh::Segue* segue = static_cast<swoosh::Segue*>(activities.top());
 
-        if (getRequestedQuality() == quality::mobile) {
-          segue->timer.update(sf::seconds(static_cast<float>(elapsed)));
-        }
-        else {
-          segue->onUpdate(elapsed);
-        }
+        segue->onUpdate(elapsed);
 
         if (segue->timer.getElapsed().asMilliseconds() >= segue->duration.asMilliseconds()) {
           endSegue(segue);

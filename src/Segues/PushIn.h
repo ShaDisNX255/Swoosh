@@ -13,6 +13,26 @@ template<types::direction direction>
 class PushIn : public Segue {
   sf::Texture next, last;
   bool firstPass{ true };
+
+#if defined(__ANDROID__) || defined(ANDROID)
+  static void ONBAndroidFlipRenderTextureSprite(sf::Sprite& sprite) {
+    const sf::Texture* texture = sprite.getTexture();
+
+    if (!texture) {
+      return;
+    }
+
+    const sf::Vector2f pos = sprite.getPosition();
+    const sf::Vector2f scale = sprite.getScale();
+
+    sprite.setScale(scale.x, -scale.y);
+    sprite.setPosition(
+      pos.x,
+      pos.y + static_cast<float>(texture->getSize().y) * scale.y
+    );
+  }
+#endif
+
 public:
 
  void onDraw(sf::RenderTexture& surface) override {
@@ -47,6 +67,10 @@ public:
 
     left.setPosition((float)(lr * alpha * left.getTexture()->getSize().x), (float)(ud * alpha * left.getTexture()->getSize().y));
 
+#if defined(__ANDROID__) || defined(ANDROID)
+    ONBAndroidFlipRenderTextureSprite(left);
+#endif
+
     surface.clear(this->getNextActivityBGColor());
 
     if (firstPass || !optimized) {
@@ -63,6 +87,10 @@ public:
     sf::Sprite right(temp2);
 
     right.setPosition((float)(-lr * (1.0-alpha) * right.getTexture()->getSize().x), (float)(-ud * (1.0-alpha) * right.getTexture()->getSize().y));
+
+#if defined(__ANDROID__) || defined(ANDROID)
+    ONBAndroidFlipRenderTextureSprite(right);
+#endif
 
     surface.draw(left);
     surface.draw(right);
